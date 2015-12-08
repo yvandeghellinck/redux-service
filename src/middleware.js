@@ -1,6 +1,6 @@
 import {ServiceClass} from './ServiceClass'
 
-export const ServiceClassMiddleware = store => next => action => {
+export default middleware = store => next => action => {
 	//serialize request to map action
 	//Differ success call
 	if(action instanceof ServiceClass) {		

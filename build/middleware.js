@@ -6,7 +6,7 @@ Object.defineProperty(exports, '__esModule', {
 
 var _ServiceClass = require('./ServiceClass');
 
-var ServiceClassMiddleware = function ServiceClassMiddleware(store) {
+exports['default'] = middleware = function (store) {
 	return function (next) {
 		return function (action) {
 			//serialize request to map action
@@ -20,4 +20,5 @@ var ServiceClassMiddleware = function ServiceClassMiddleware(store) {
 		};
 	};
 };
-exports.ServiceClassMiddleware = ServiceClassMiddleware;
+
+module.exports = exports['default'];
