@@ -24,8 +24,8 @@ var API_CALL = _require.API_CALL;
 var METHODS = _require.METHODS;
 var METHODS_MAPPER = _require.METHODS_MAPPER;
 
-exports['default'] = ServiceClass = (function () {
-	_createClass(_class, null, [{
+var ServiceClass = (function () {
+	_createClass(ServiceClass, null, [{
 		key: 'fake',
 		value: function fake(docName, data, dispatcher) {
 			debugger;
@@ -50,8 +50,8 @@ exports['default'] = ServiceClass = (function () {
 		}
 	}]);
 
-	function _class(docName, action, url, data, options) {
-		_classCallCheck(this, _class);
+	function ServiceClass(docName, action, url, data, options) {
+		_classCallCheck(this, ServiceClass);
 
 		this.type = API_CALL;
 
@@ -62,7 +62,7 @@ exports['default'] = ServiceClass = (function () {
 		this.options = options || {};
 	}
 
-	_createClass(_class, [{
+	_createClass(ServiceClass, [{
 		key: 'isFinished',
 		value: function isFinished() {
 			return this.state == ServiceState.FINISH;
@@ -177,7 +177,8 @@ exports['default'] = ServiceClass = (function () {
 		}
 	}]);
 
-	return _class;
+	return ServiceClass;
 })();
 
+exports['default'] = ServiceClass;
 module.exports = exports['default'];

@@ -3,7 +3,7 @@ import _ from 'underscore';
 
 const {API_CALL, METHODS, METHODS_MAPPER} = require('./constants');
 
-export default ServiceClass = class {
+const ServiceClass = class {
 
 	static fake(docName, data, dispatcher) {
 		debugger
@@ -141,3 +141,4 @@ export default ServiceClass = class {
 	}
 }
 
+export default ServiceClass;
