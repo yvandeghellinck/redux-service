@@ -1,0 +1,29 @@
+{
+  "name": "redux-service",
+  "version": "1.0.0",
+  "description": "Redux api helper",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yvandeghellinck/redux-service.git"
+  },
+  "keywords": [
+    "redux",
+    "rest",
+    "api",
+    "ajax"
+  ],
+  "author": "Yvan de Ghellinck",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/yvandeghellinck/redux-service/issues"
+  },
+  "homepage": "https://github.com/yvandeghellinck/redux-service#readme",
+  "dependencies": {
+    "jquery": "^2.1.4",
+    "underscore": "^1.8.3"
+  }
+}
