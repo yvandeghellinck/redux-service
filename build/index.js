@@ -1,6 +1,9 @@
-exports.__esModule = true;
-exports['ServiceClass'] = require('./ServiceClass');
-exports['middleware'] = require('./middleware');
-exports['constants'] = require('./constants');
+'use strict';
 
-module.exports = exports;
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
+var ServiceClass = require('./ServiceClass');
+exports.ServiceClass = ServiceClass;
+var middleware = require('./middleware');
+exports.middleware = middleware;
