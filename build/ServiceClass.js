@@ -23,6 +23,7 @@ var _require = require('./constants');
 var API_CALL = _require.API_CALL;
 var METHODS = _require.METHODS;
 var METHODS_MAPPER = _require.METHODS_MAPPER;
+var SERVICE_STATE = _require.SERVICE_STATE;
 
 var ServiceClass = (function () {
 	_createClass(ServiceClass, null, [{
@@ -33,7 +34,7 @@ var ServiceClass = (function () {
 	}, {
 		key: 'asAction',
 		value: function asAction(docName) {
-			var serviceState = arguments.length <= 1 || arguments[1] === undefined ? ServiceState.FINISH : arguments[1];
+			var serviceState = arguments.length <= 1 || arguments[1] === undefined ? SERVICE_STATE.FINISH : arguments[1];
 
 			return API_CALL + '_' + docName + '_' + serviceState;
 		}
@@ -43,7 +44,7 @@ var ServiceClass = (function () {
 			if (!str.startsWith(API_CALL)) {
 				return false;
 			}
-			if (!str.endsWith(ServiceState.ERROR)) {
+			if (!str.endsWith(SERVICE_STATE.ERROR)) {
 				return false;
 			}
 			return true;
@@ -65,17 +66,17 @@ var ServiceClass = (function () {
 	_createClass(ServiceClass, [{
 		key: 'isFinished',
 		value: function isFinished() {
-			return this.state == ServiceState.FINISH;
+			return this.state == SERVICE_STATE.FINISH;
 		}
 	}, {
 		key: 'isExecuting',
 		value: function isExecuting() {
-			return this.state == ServiceState.EXECUTE;
+			return this.state == SERVICE_STATE.EXECUTE;
 		}
 	}, {
 		key: 'hasAnError',
 		value: function hasAnError() {
-			return this.state == ServiceState.error;
+			return this.state == SERVICE_STATE.error;
 		}
 	}, {
 		key: 'launchRequest',
@@ -94,7 +95,7 @@ var ServiceClass = (function () {
 					"accept": "application/json"
 				},
 				'success': (function (data, status, request) {
-					this.state = ServiceState.FINISH;
+					this.state = SERVICE_STATE.FINISH;
 					if (this.options.parse) {
 						this.data = this.options.parse.apply(this, [data, this.options]);
 					} else {
@@ -103,7 +104,7 @@ var ServiceClass = (function () {
 					dispatch(this.serialize());
 				}).bind(this),
 				'error': (function (error) {
-					this.state = ServiceState.ERROR;
+					this.state = SERVICE_STATE.ERROR;
 					this.error = error;
 					dispatch(this.serialize());
 				}).bind(this)
@@ -146,7 +147,7 @@ var ServiceClass = (function () {
 	}, {
 		key: 'getStartAction',
 		value: function getStartAction() {
-			this.state = ServiceState.EXECUTE;
+			this.state = SERVICE_STATE.EXECUTE;
 			return this.serialize();
 		}
 	}, {

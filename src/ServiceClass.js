@@ -1,7 +1,7 @@
 import $ from 'jquery';
 import _ from 'underscore';
 
-const {API_CALL, METHODS, METHODS_MAPPER} = require('./constants');
+const {API_CALL, METHODS, METHODS_MAPPER, SERVICE_STATE} = require('./constants');
 
 const ServiceClass = class {
 
@@ -9,7 +9,7 @@ const ServiceClass = class {
 		debugger
 	}
 
-	static asAction(docName, serviceState = ServiceState.FINISH) {
+	static asAction(docName, serviceState = SERVICE_STATE.FINISH) {
 		return API_CALL+'_'+docName+'_'+serviceState;
 	}
 
@@ -17,7 +17,7 @@ const ServiceClass = class {
 		if(!str.startsWith(API_CALL)) {
 			return false;
 		}
-		if(!str.endsWith(ServiceState.ERROR)) {
+		if(!str.endsWith(SERVICE_STATE.ERROR)) {
 			return false;
 		}
 		return true;
@@ -34,15 +34,15 @@ const ServiceClass = class {
 	}
 
 	isFinished() {
-		return this.state == ServiceState.FINISH;
+		return this.state == SERVICE_STATE.FINISH;
 	}
 
 	isExecuting() {
-		return this.state == ServiceState.EXECUTE;
+		return this.state == SERVICE_STATE.EXECUTE;
 	}
 
 	hasAnError() {
-		return this.state == ServiceState.error;
+		return this.state == SERVICE_STATE.error;
 	}
 
 	launchRequest(dispatch) {
@@ -59,7 +59,7 @@ const ServiceClass = class {
 			      "accept": "application/json",
 			},
 			'success': function(data, status, request){
-				this.state = ServiceState.FINISH;
+				this.state = SERVICE_STATE.FINISH;
 				if(this.options.parse) {
 					this.data = this.options.parse.apply(this, [data, this.options]);
 				} else {
@@ -68,7 +68,7 @@ const ServiceClass = class {
 				dispatch(this.serialize());
 			}.bind(this),
 			'error': function(error){
-				this.state = ServiceState.ERROR;
+				this.state = SERVICE_STATE.ERROR;
 				this.error = error;
 				dispatch(this.serialize())
 			}.bind(this)
@@ -112,7 +112,7 @@ const ServiceClass = class {
 	}
 
 	getStartAction() {
-		this.state = ServiceState.EXECUTE;
+		this.state = SERVICE_STATE.EXECUTE;
 		return this.serialize();
 	}
 
