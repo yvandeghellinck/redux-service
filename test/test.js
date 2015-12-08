@@ -1,0 +1,3 @@
+require('./ServiceClassTest');
+require('./middlewareTest');
+

@@ -4,9 +4,10 @@
   "description": "Redux api helper",
   "main": "build/index.js",
   "scripts": {
+    "test": "mocha --compilers js:babel/register",
     "build": "babel src --out-dir build",
     "prepublish": "npm run build",
-    "deploy": "npm run prepublish && git commit -a -m 'deploy' && git push"
+    "deploy": "npm test && npm run prepublish && git commit -a -m 'deploy' && git push"
   },
   "repository": {
     "type": "git",
@@ -18,7 +19,7 @@
     "babel-eslint": "^3.1.20",
     "eslint": "^0.24.0",
     "eslint-config-airbnb": "0.0.6"
-  },  
+  },
   "keywords": [
     "redux",
     "rest",
@@ -32,7 +33,9 @@
   },
   "homepage": "https://github.com/yvandeghellinck/redux-service#readme",
   "dependencies": {
+    "chai": "^3.4.1",
     "jquery": "^2.1.4",
+    "mocha": "^2.3.4",
     "underscore": "^1.8.3"
   }
 }
