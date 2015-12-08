@@ -28,8 +28,18 @@ var SERVICE_STATE = _require.SERVICE_STATE;
 var ServiceClass = (function () {
 	_createClass(ServiceClass, null, [{
 		key: 'fake',
-		value: function fake(docName, data, dispatcher) {
-			debugger;
+		value: function fake(docName, data, dispatch) {
+			var aTimeout = arguments.length <= 3 || arguments[3] === undefined ? Math.random() * 2000 : arguments[3];
+
+			dispatch({
+				type: API_CALL + '_' + docName + '_' + SERVICE_STATE.EXECUTE
+			});
+			setTimeout(function () {
+				dispatch({
+					type: API_CALL + '_' + docName + '_' + SERVICE_STATE.FINISH,
+					data: data
+				});
+			}, aTimeout);
 		}
 	}, {
 		key: 'asAction',

@@ -5,8 +5,16 @@ const {API_CALL, METHODS, METHODS_MAPPER, SERVICE_STATE} = require('./constants'
 
 const ServiceClass = class {
 
-	static fake(docName, data, dispatcher) {
-		debugger
+	static fake(docName, data, dispatch, aTimeout = (Math.random()*2000)) {
+		dispatch({
+			type:API_CALL+'_'+docName+'_'+SERVICE_STATE.EXECUTE,
+		});
+		setTimeout(() => {
+			dispatch({
+				type:API_CALL+'_'+docName+'_'+SERVICE_STATE.FINISH,
+				data
+			});
+		}, aTimeout);
 	}
 
 	static asAction(docName, serviceState = SERVICE_STATE.FINISH) {
