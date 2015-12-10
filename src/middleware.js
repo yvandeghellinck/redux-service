@@ -62,14 +62,20 @@ export class ServiceMiddlewareManager {
 		}.bind(this)
 	}
 
-	executeStackServices (store) {
+	executeStackServices (store, requestLauncher) {
 		return new Promise((resolve, reject) => {
 			var services = this.getStack();
 
 			var promises = services.map((service, index)=>{
 				store.dispatch(service.getStartAction());
 				
-				service.launchRequest(store.dispatch)
+				var promise = null;
+				if(!requestLauncher) {
+					promise = service.launchRequest(store.dispatch)	
+				} else {
+					promise = requestLauncher(service.url, this.generateAjaxOption(store.dispatch));
+				}
+				promise
 				.then(()=>{
 					promises[index] = 'accepted';
 					var count = 0;

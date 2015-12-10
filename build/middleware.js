@@ -102,7 +102,7 @@ var ServiceMiddlewareManager = (function () {
 		}
 	}, {
 		key: 'executeStackServices',
-		value: function executeStackServices(store) {
+		value: function executeStackServices(store, requestLauncher) {
 			var _this2 = this;
 
 			return new Promise((function (resolve, reject) {
@@ -111,7 +111,13 @@ var ServiceMiddlewareManager = (function () {
 				var promises = services.map((function (service, index) {
 					store.dispatch(service.getStartAction());
 
-					service.launchRequest(store.dispatch).then((function () {
+					var promise = null;
+					if (!requestLauncher) {
+						promise = service.launchRequest(store.dispatch);
+					} else {
+						promise = requestLauncher(service.url, _this2.generateAjaxOption(store.dispatch));
+					}
+					promise.then((function () {
 						promises[index] = 'accepted';
 						var count = 0;
 						promises.forEach(function (currentPromise) {
