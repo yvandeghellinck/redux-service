@@ -19,3 +19,5 @@ export const METHODS_MAPPER = {
 }
 
 export const API_CALL ='API_CALL'
+
+export const STACK_SERVICES ='STACK_SERVICES'
