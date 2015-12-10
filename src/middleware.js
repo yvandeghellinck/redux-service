@@ -74,7 +74,7 @@ export class ServiceMiddlewareManager {
 				if(!requestLauncher) {
 					promise = service.launchRequest(store.dispatch)	
 				} else {
-					promise = requestLauncher.apply(manager, [service.url, service.generateAjaxOption(store.dispatch)]);
+					promise = requestLauncher.apply(service, [service.url, service.generateAjaxOption(store.dispatch)]);
 				}
 				promise
 				.then(()=>{
@@ -88,10 +88,10 @@ export class ServiceMiddlewareManager {
 					if(count === promises.length) {
 						resolve();
 					}
-				}.bind(this))
+				}.bind(manager))
 				.catch(reject);
 				return 'start_request'
 			}.bind(manager));
-		}.bind(this));
+		}.bind(manager));
 	}
 }
