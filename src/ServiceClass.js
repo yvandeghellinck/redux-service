@@ -1,4 +1,4 @@
-import $ from 'jquery';
+import SJQuery from 'jquery';
 import _ from 'underscore';
 
 const {API_CALL, METHODS, METHODS_MAPPER, SERVICE_STATE} = require('./constants');
@@ -54,7 +54,7 @@ const ServiceClass = class {
 	}
 
 	launchRequest(dispatch) {
-		$.ajax(this.url, this.generateAjaxOption(dispatch));	
+		SJQuery.ajax(this.url, this.generateAjaxOption(dispatch));	
 	}
 
 	defaultAjaxOptions(dispatch) {
