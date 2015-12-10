@@ -105,6 +105,7 @@ var ServiceMiddlewareManager = (function () {
 		value: function executeStackServices(store, requestLauncher) {
 			var _this2 = this;
 
+			var manager = this;
 			return new Promise((function (resolve, reject) {
 				var services = _this2.getStack();
 
@@ -115,7 +116,7 @@ var ServiceMiddlewareManager = (function () {
 					if (!requestLauncher) {
 						promise = service.launchRequest(store.dispatch);
 					} else {
-						promise = requestLauncher.apply(_this2, [service.url, service.generateAjaxOption(store.dispatch)]);
+						promise = requestLauncher.apply(manager, [service.url, service.generateAjaxOption(store.dispatch)]);
 					}
 					promise.then((function () {
 						promises[index] = 'accepted';
@@ -130,7 +131,7 @@ var ServiceMiddlewareManager = (function () {
 						}
 					}).bind(_this2))['catch'](reject);
 					return 'start_request';
-				}).bind(_this2));
+				}).bind(manager));
 			}).bind(this));
 		}
 	}]);

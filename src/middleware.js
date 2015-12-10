@@ -63,6 +63,7 @@ export class ServiceMiddlewareManager {
 	}
 
 	executeStackServices (store, requestLauncher) {
+		var manager = this;
 		return new Promise((resolve, reject) => {
 			var services = this.getStack();
 
@@ -73,7 +74,7 @@ export class ServiceMiddlewareManager {
 				if(!requestLauncher) {
 					promise = service.launchRequest(store.dispatch)	
 				} else {
-					promise = requestLauncher.apply(this, [service.url, service.generateAjaxOption(store.dispatch)]);
+					promise = requestLauncher.apply(manager, [service.url, service.generateAjaxOption(store.dispatch)]);
 				}
 				promise
 				.then(()=>{
@@ -90,7 +91,7 @@ export class ServiceMiddlewareManager {
 				}.bind(this))
 				.catch(reject);
 				return 'start_request'
-			}.bind(this));
+			}.bind(manager));
 		}.bind(this));
 	}
 }
