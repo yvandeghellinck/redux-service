@@ -115,7 +115,7 @@ var ServiceMiddlewareManager = (function () {
 					if (!requestLauncher) {
 						promise = service.launchRequest(store.dispatch);
 					} else {
-						promise = requestLauncher(service.url, service.generateAjaxOption(store.dispatch));
+						promise = requestLauncher.apply(_this2, [service.url, service.generateAjaxOption(store.dispatch)]);
 					}
 					promise.then((function () {
 						promises[index] = 'accepted';

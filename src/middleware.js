@@ -73,7 +73,7 @@ export class ServiceMiddlewareManager {
 				if(!requestLauncher) {
 					promise = service.launchRequest(store.dispatch)	
 				} else {
-					promise = requestLauncher(service.url, service.generateAjaxOption(store.dispatch));
+					promise = requestLauncher.apply(this, [service.url, service.generateAjaxOption(store.dispatch)]);
 				}
 				promise
 				.then(()=>{
