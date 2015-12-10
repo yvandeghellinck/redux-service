@@ -35,8 +35,8 @@ const ServiceClass = class {
 		this.type = API_CALL;
 
 		this.docName = docName;
-		this.action = action;
-		this.url = url;
+		this.action = action|| METHODS.READ;
+		this.url = url||'';
 		this.data = data;
 		this.options = options || {};
 	}
@@ -54,7 +54,22 @@ const ServiceClass = class {
 	}
 
 	launchRequest(dispatch) {
-		SJQuery.ajax(this.url, this.generateAjaxOption(dispatch));	
+		return new Promise((resolve, reject)=>{
+			var options = this.generateAjaxOption(dispatch);
+			var defaultSuccess = options.success;
+			var defaultError = options.error;
+			options.success = (...args)=>{
+				defaultSuccess.apply(this, args)
+				resolve(...args);
+			};
+			options.error = (...args)=>{
+				defaultError.apply(this, args)
+				reject(...args);
+			};
+
+			SJQuery.ajax(this.url, this.generateAjaxOption(dispatch));
+		});
+		
 	}
 
 	defaultAjaxOptions(dispatch) {
@@ -69,9 +84,9 @@ const ServiceClass = class {
 			'success': function(data, status, request){
 				this.state = SERVICE_STATE.FINISH;
 				if(this.options.parse) {
-					this.data = this.options.parse.apply(this, [data, this.options]);
+					this.dataResponse = this.options.parse.apply(this, [data, this.options]);
 				} else {
-					this.data = data;
+					this.dataResponse = data;
 				}
 				dispatch(this.serialize());
 			}.bind(this),
@@ -137,7 +152,7 @@ const ServiceClass = class {
 			url : this.url,
 			
 			state : this.state,
-			data : this.data,
+			data : this.dataResponse,
 			error : this.error,
 
 			isFinished : this.isFinished(),

@@ -67,8 +67,8 @@ var ServiceClass = (function () {
 		this.type = API_CALL;
 
 		this.docName = docName;
-		this.action = action;
-		this.url = url;
+		this.action = action || METHODS.READ;
+		this.url = url || '';
 		this.data = data;
 		this.options = options || {};
 	}
@@ -91,7 +91,31 @@ var ServiceClass = (function () {
 	}, {
 		key: 'launchRequest',
 		value: function launchRequest(dispatch) {
-			_jquery2['default'].ajax(this.url, this.generateAjaxOption(dispatch));
+			var _this = this;
+
+			return new Promise(function (resolve, reject) {
+				var options = _this.generateAjaxOption(dispatch);
+				var defaultSuccess = options.success;
+				var defaultError = options.error;
+				options.success = function () {
+					for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+						args[_key] = arguments[_key];
+					}
+
+					defaultSuccess.apply(_this, args);
+					resolve.apply(undefined, args);
+				};
+				options.error = function () {
+					for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+						args[_key2] = arguments[_key2];
+					}
+
+					defaultError.apply(_this, args);
+					reject.apply(undefined, args);
+				};
+
+				_jquery2['default'].ajax(_this.url, _this.generateAjaxOption(dispatch));
+			});
 		}
 	}, {
 		key: 'defaultAjaxOptions',
@@ -107,9 +131,9 @@ var ServiceClass = (function () {
 				'success': (function (data, status, request) {
 					this.state = SERVICE_STATE.FINISH;
 					if (this.options.parse) {
-						this.data = this.options.parse.apply(this, [data, this.options]);
+						this.dataResponse = this.options.parse.apply(this, [data, this.options]);
 					} else {
-						this.data = data;
+						this.dataResponse = data;
 					}
 					dispatch(this.serialize());
 				}).bind(this),
@@ -176,7 +200,7 @@ var ServiceClass = (function () {
 				url: this.url,
 
 				state: this.state,
-				data: this.data,
+				data: this.dataResponse,
 				error: this.error,
 
 				isFinished: this.isFinished(),

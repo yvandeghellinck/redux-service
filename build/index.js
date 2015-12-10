@@ -5,7 +5,10 @@ Object.defineProperty(exports, '__esModule', {
 });
 var ServiceClass = require('./ServiceClass');
 exports.ServiceClass = ServiceClass;
-var middleware = require('./middleware');
+
+var _require = require('./middleware');
+
+var middleware = _require.middleware;
 exports.middleware = middleware;
 var constants = require('./constants');
 exports.constants = constants;
