@@ -62,21 +62,19 @@ export class ServiceMiddlewareManager {
 		}.bind(this)
 	}
 
-	executeStackServices (store, requestLauncher) {
+	executeStackServices (store) {
 		var manager = this;
 		return new Promise((resolve, reject) => {
 			var services = this.getStack();
+			if(services.length === 0) {
+				return resolve();
+			}
 
-			var promises = services.map((service, index)=>{
+			var promises = [];
+			services.forEach((service, index)=>{
 				store.dispatch(service.getStartAction());
 				
-				var promise = null;
-				if(!requestLauncher) {
-					promise = service.launchRequest(store.dispatch)	
-				} else {
-					promise = requestLauncher.apply(service, [service.url, service.generateAjaxOption(store.dispatch)]);
-				}
-				promise
+				service.launchRequest(store.dispatch)	
 				.then(()=>{
 					promises[index] = 'accepted';
 					var count = 0;
@@ -91,7 +89,7 @@ export class ServiceMiddlewareManager {
 				}.bind(manager))
 				.catch(reject);
 				return 'start_request'
-			}.bind(manager));
-		}.bind(manager));
+			}.bind(this));
+		}.bind(this));
 	}
 }

@@ -123,6 +123,7 @@ describe('Array', function() {
     });
 
 
+
     it('test middleware manager stack correctly pushed when stack mode', function () {
     	var manager = new ServiceMiddlewareManager();
 
@@ -172,6 +173,19 @@ describe('Array', function() {
     	manager.executeStackServices(store)
     	.then(response=>done(new Error('accepted but error inside request...')))
     	.catch(error=>done());
+    });
+
+    it('test async callback when no stacked services', function (done) {
+        var manager = new ServiceMiddlewareManager();
+
+        var generatedMiddleware = manager.middleware();
+        manager.setStackMode(true);
+        var store = generateFakeStore();
+        var neverCalledNext = ()=>{};
+        
+        manager.executeStackServices(store)
+        .then(response=>done())
+        .catch(done);
     });
 
   });
