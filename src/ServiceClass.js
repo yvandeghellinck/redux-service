@@ -92,7 +92,7 @@ const ServiceClass = class {
 			}.bind(this),
 			'error': function(error){
 				this.state = SERVICE_STATE.ERROR;
-				this.error = error;
+				this.error = error.responseJSON
 				dispatch(this.serialize())
 			}.bind(this)
 		};
