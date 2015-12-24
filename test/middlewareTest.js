@@ -1,194 +1,183 @@
-import chai from 'chai';
-import {expect, assert} from 'chai';
+// import chai from 'chai';
+import { expect, assert } from 'chai';
+import { middleware, queuingServiceMiddleware, ServiceMiddlewareManager } from '../src/middleware';
+
 // var assert = require('assert');
 const ServiceClass = require('../src/ServiceClass');
-const {SERVICE_STATE} = require('../src/constants')
+const { SERVICE_STATE } = require('../src/constants');
 
 class TestServiceClass extends ServiceClass {
 
-	constructor(success=true) {
+	constructor(success = true) {
 		super('test', 'unknow', null, null, null);
 		this.endWithSuccess = success;
 	}
 
 	launchRequest(dispatch) {
-		return new Promise((resolve, reject)=>{
-			setTimeout(function() {
-
-				if(this.endWithSuccess) {
+		return new Promise((resolve, reject) => {
+			setTimeout(() => {
+				if (this.endWithSuccess) {
 					this.state = SERVICE_STATE.FINISH;
 					this.dataResponse = 'XYZ';
 					dispatch(this.serialize());
-					resolve();				
+					resolve();
 				} else {
 					this.state = SERVICE_STATE.ERROR;
 					dispatch(this.serialize());
 					reject(new Error('REJECT SERVICE'));
 				}
-
-			}.bind(this), Math.random()*200);				
+			}, Math.random() * 200);
 		});
 	}
 }
-
-import {middleware, queuingServiceMiddleware, ServiceMiddlewareManager}  from '../src/middleware';
 
 class Store {
 	getState() {
 		return {};
 	}
-
-	dispatch(action) {
-		
-	}
+	dispatch() {}
 }
 
 const generateFakeStore = () => {
 	return new Store();
-}
+};
 
-const generateNext = () => {
-	return ()=>{};
-}
+// const generateNext = () => {
+// 	return ()=>{};
+// };
 
-describe('Array', function() {
-  describe('#testing middleware', function () {
-    it('test serviceclass correctly serialized by middleware in normal mode', function () {
-    	middleware(generateFakeStore())((action)=>{
-    		expect(action).to.be.an('object');
-    		expect(action).to.have.property('type');//.with.length(3);
-    	})(new TestServiceClass());
-    });
+describe('Array', () => {
+	describe('#testing middleware', () => {
+		it('test serviceclass correctly serialized by middleware in normal mode', () => {
+			middleware(generateFakeStore())((action) => {
+				expect(action).to.be.an('object');
+				expect(action).to.have.property('type');// .with.length(3);
+			})(new TestServiceClass());
+		});
 
-    it('test serviceclass correctly stopped by queuingServiceMiddleware', function () {
-    	const myStack = [];
-    	var mw = queuingServiceMiddleware(myStack);
-    	mw(generateFakeStore())((action)=>{
-    		// expect(action).to.be.an('object');
-    		throw new Error('Unexpected call');
-    	})(new TestServiceClass());
-    	mw(generateFakeStore())((action)=>{
-    		// expect(action).to.be.an('object');
-    		throw new Error('Unexpected call');
-    	})(new TestServiceClass());
-    	assert(myStack.length === 2);
-    });
+		it('test serviceclass correctly stopped by queuingServiceMiddleware', () => {
+			const myStack = [];
+			const mw = queuingServiceMiddleware(myStack);
+			mw(generateFakeStore())(() => {
+				// expect(action).to.be.an('object');
+				throw new Error('Unexpected call');
+			})(new TestServiceClass());
+			mw(generateFakeStore())(() => {
+				// expect(action).to.be.an('object');
+				throw new Error('Unexpected call');
+			})(new TestServiceClass());
+			assert(myStack.length === 2);
+		});
 
-    it('test middleware manager stack switch False call next', function () {
-    	var manager = new ServiceMiddlewareManager();
+		it('test middleware manager stack switch False call next', () => {
+			const manager = new ServiceMiddlewareManager();
 
-    	var generatedMiddleware = manager.middleware();
-		var aService = new TestServiceClass();
+			const generatedMiddleware = manager.middleware();
+			const aService = new TestServiceClass();
 
-    	manager.setStackMode(false);
+			manager.setStackMode(false);
 
-    	generatedMiddleware(generateFakeStore())(action=>{
-    		assert(true);
-    	})(aService);
-
-    });
-
-
-    it('test middleware manager stack switch true not call next', function () {
-    	var manager = new ServiceMiddlewareManager();
-
-    	var generatedMiddleware = manager.middleware();
-		var aService = new TestServiceClass();
-
-    	manager.setStackMode(true);
-
-    	generatedMiddleware(generateFakeStore())(action=>{
-    		assert(false);
-    	})(aService);
-    	assert(true);
-    });
+			generatedMiddleware(generateFakeStore())(() => {
+				assert(true);
+			})(aService);
+		});
 
 
-    it('test middleware manager stack switch true and false after', function () {
-    	var manager = new ServiceMiddlewareManager();
+		it('test middleware manager stack switch true not call next', () => {
+			const manager = new ServiceMiddlewareManager();
 
-    	var generatedMiddleware = manager.middleware();
-		var aService = new TestServiceClass();
+			const generatedMiddleware = manager.middleware();
+			const aService = new TestServiceClass();
 
-    	manager.setStackMode(false);
-    	generatedMiddleware(generateFakeStore())(action=>{
-    		assert(true);
-    	})(aService);
+			manager.setStackMode(true);
 
-    	manager.setStackMode(true);
-    	generatedMiddleware(generateFakeStore())(action=>{
-    		assert(false);
-    	})(aService);
-    	assert(true);
-    });
+			generatedMiddleware(generateFakeStore())(() => {
+				assert(false);
+			})(aService);
+			assert(true);
+		});
 
 
+		it('test middleware manager stack switch true and false after', () => {
+			const manager = new ServiceMiddlewareManager();
 
-    it('test middleware manager stack correctly pushed when stack mode', function () {
-    	var manager = new ServiceMiddlewareManager();
+			const generatedMiddleware = manager.middleware();
+			const aService = new TestServiceClass();
 
-    	var generatedMiddleware = manager.middleware();
-    	manager.setStackMode(true);
-    	var store = generateFakeStore();
-    	var neverCalledNext = ()=>{assert(false, ' is called ?')};
+			manager.setStackMode(false);
+			generatedMiddleware(generateFakeStore())(() => {
+				assert(true);
+			})(aService);
 
-    	generatedMiddleware(store)(neverCalledNext)(new TestServiceClass());
-    	generatedMiddleware(store)(neverCalledNext)(new TestServiceClass());
-    	generatedMiddleware(store)(neverCalledNext)(new TestServiceClass());
+			manager.setStackMode(true);
+			generatedMiddleware(generateFakeStore())(() => {
+				assert(false);
+			})(aService);
+			assert(true);
+		});
 
-    	assert(manager.getStack().length === 3);
 
-    });
+		it('test middleware manager stack correctly pushed when stack mode', () => {
+			const manager = new ServiceMiddlewareManager();
+
+			const generatedMiddleware = manager.middleware();
+			manager.setStackMode(true);
+			const store = generateFakeStore();
+			const neverCalledNext = () => { assert(false, ' is called ?'); };
+
+			generatedMiddleware(store)(neverCalledNext)(new TestServiceClass());
+			generatedMiddleware(store)(neverCalledNext)(new TestServiceClass());
+			generatedMiddleware(store)(neverCalledNext)(new TestServiceClass());
+
+			assert(manager.getStack().length === 3);
+		});
 
 
-    it('test async callback when stacked services all ok', function (done) {
-    	var manager = new ServiceMiddlewareManager();
+		it('test async callback when stacked services all ok', (done) => {
+			const manager = new ServiceMiddlewareManager();
 
-    	var generatedMiddleware = manager.middleware();
-    	manager.setStackMode(true);
-    	var store = generateFakeStore();
-    	var neverCalledNext = ()=>{};
+			const generatedMiddleware = manager.middleware();
+			manager.setStackMode(true);
+			const store = generateFakeStore();
+			const neverCalledNext = () => {};
 
-    	generatedMiddleware(store)(neverCalledNext)(new TestServiceClass(true));
-    	generatedMiddleware(store)(neverCalledNext)(new TestServiceClass(true));
-    	generatedMiddleware(store)(neverCalledNext)(new TestServiceClass(true));
-    	
-    	manager.executeStackServices(store)
-    	.then(response=>done())
-    	.catch(done);
-    });
+			generatedMiddleware(store)(neverCalledNext)(new TestServiceClass(true));
+			generatedMiddleware(store)(neverCalledNext)(new TestServiceClass(true));
+			generatedMiddleware(store)(neverCalledNext)(new TestServiceClass(true));
 
-    it('test async callback when stacked services one ko on 3', function (done) {
-    	var manager = new ServiceMiddlewareManager();
+			manager.executeStackServices(store)
+			.then(() => done())
+			.catch(done);
+		});
 
-    	var generatedMiddleware = manager.middleware();
-    	manager.setStackMode(true);
-    	var store = generateFakeStore();
-    	var neverCalledNext = ()=>{};
+		it('test async callback when stacked services one ko on 3', (done) => {
+			const manager = new ServiceMiddlewareManager();
 
-    	generatedMiddleware(store)(neverCalledNext)(new TestServiceClass(true));
-    	generatedMiddleware(store)(neverCalledNext)(new TestServiceClass(false));
-    	generatedMiddleware(store)(neverCalledNext)(new TestServiceClass(true));
-    	
-    	manager.executeStackServices(store)
-    	.then(response=>done(new Error('accepted but error inside request...')))
-    	.catch(error=>done());
-    });
+			const generatedMiddleware = manager.middleware();
+			manager.setStackMode(true);
+			const store = generateFakeStore();
+			const neverCalledNext = () => {};
 
-    it('test async callback when no stacked services', function (done) {
-        var manager = new ServiceMiddlewareManager();
+			generatedMiddleware(store)(neverCalledNext)(new TestServiceClass(true));
+			generatedMiddleware(store)(neverCalledNext)(new TestServiceClass(false));
+			generatedMiddleware(store)(neverCalledNext)(new TestServiceClass(true));
 
-        var generatedMiddleware = manager.middleware();
-        manager.setStackMode(true);
-        var store = generateFakeStore();
-        var neverCalledNext = ()=>{};
-        
-        manager.executeStackServices(store)
-        .then(response=>done())
-        .catch(done);
-    });
+			manager.executeStackServices(store)
+			.then(() => done(new Error('accepted but error inside request...')))
+			.catch(() => done());
+		});
 
-  });
+		it('test async callback when no stacked services', (done) => {
+			const manager = new ServiceMiddlewareManager();
+
+			// const generatedMiddleware = manager.middleware();
+			manager.setStackMode(true);
+			const store = generateFakeStore();
+			// const neverCalledNext = ()=>{};
+
+			manager.executeStackServices(store)
+			.then(() => done())
+			.catch(done);
+		});
+	});
 });
-
-

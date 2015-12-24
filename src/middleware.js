@@ -1,32 +1,29 @@
-let ServiceClass = require('./ServiceClass');
+const ServiceClass = require('./ServiceClass');
 
-export const queuingServiceMiddleware = (stack = []) => store => next => action => {
-	
-	if(action instanceof ServiceClass) {
+export const queuingServiceMiddleware = (stack = []) => () => next => action => {
+	if (action instanceof ServiceClass) {
 		stack.push(action);
-		return;
+		return null;
 		// var startAction = action.getStartAction();
 		// action.launchRequest(store.dispatch);
 		// return next(startAction);
 	}
-
 	return next(action);
-}
+};
 
-export const middleware = store => next => action => {
-	//serialize request to map action
-	//Differ success call
-	if(action instanceof ServiceClass) {
-		var startAction = action.getStartAction();
+// serialize request to map action
+// Differ success call
+export const middleware = store => next => action => {
+	if (action instanceof ServiceClass) {
+		const startAction = action.getStartAction();
 		action.launchRequest(store.dispatch);
 		return next(startAction);
 	}
 
 	return next(action);
-}
+};
 
 export class ServiceMiddlewareManager {
-	
 	constructor(stackMode = false) {
 		this._stack = [];
 		this.setStackMode(stackMode);
@@ -38,7 +35,7 @@ export class ServiceMiddlewareManager {
 	}
 
 	setStackMode(stackMode) {
-		if(stackMode) {
+		if (stackMode) {
 			this._stack = [];
 			this._queuingServiceMiddleware = queuingServiceMiddleware(this.getStack());
 		}
@@ -49,47 +46,43 @@ export class ServiceMiddlewareManager {
 		return this._stack;
 	}
 
-	middleware (){
+	middleware() {
 		return store => next => action => {
-			// if(this._silentMode) {
-			// 	return next(action);
-			// }
-			if(this._stackMode) {
+			if (this._stackMode) {
 				return this._queuingServiceMiddleware(store)(next)(action);
-			} else {
-				return this._middleware(store)(next)(action);
 			}
-		}.bind(this)
+			return this._middleware(store)(next)(action);
+		};// .bind(this)
 	}
 
-	executeStackServices (store) {
-		var manager = this;
-		return new Promise((resolve, reject) => {
-			var services = this.getStack();
-			if(services.length === 0) {
+	executeStackServices(store) {
+		// const manager = this;
+		return new Promise(function promiseFunction(resolve, reject) {
+			const services = this.getStack();
+			if (services.length === 0) {
 				return resolve();
 			}
 
-			var promises = [];
-			services.forEach((service, index)=>{
+			const promises = [];
+			services.forEach((service, index) => {
 				store.dispatch(service.getStartAction());
-				
-				service.launchRequest(store.dispatch)	
-				.then(()=>{
+
+				service.launchRequest(store.dispatch)
+				.then(() => {
 					promises[index] = 'accepted';
-					var count = 0;
-					promises.forEach(currentPromise=>{
-						if(currentPromise === 'accepted') {
+					let count = 0;
+					promises.forEach(currentPromise => {
+						if (currentPromise === 'accepted') {
 							count = count + 1;
 						}
 					});
-					if(count === promises.length) {
+					if (count === promises.length) {
 						resolve();
 					}
-				}.bind(manager))
+				})
 				.catch(reject);
-				return 'start_request'
-			}.bind(this));
+				return 'start_request';
+			});
 		}.bind(this));
 	}
 }
