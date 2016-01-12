@@ -57,32 +57,50 @@ export class ServiceMiddlewareManager {
 
 	executeStackServices(store) {
 		// const manager = this;
-		return new Promise(function promiseFunction(resolve, reject) {
-			const services = this.getStack();
-			if (services.length === 0) {
-				return resolve();
-			}
 
-			const promises = [];
-			services.forEach((service, index) => {
+		const services = this.getStack();
+		return 	Promise.all(services.map(
+			service => {
 				store.dispatch(service.getStartAction());
+				return service.launchRequest(store.dispatch);
+			}));
 
-				service.launchRequest(store.dispatch)
-				.then(() => {
-					promises[index] = 'accepted';
-					let count = 0;
-					promises.forEach(currentPromise => {
-						if (currentPromise === 'accepted') {
-							count = count + 1;
-						}
-					});
-					if (count === promises.length) {
-						resolve();
-					}
-				})
-				.catch(reject);
-				return 'start_request';
-			});
-		}.bind(this));
+		// return new Promise(function promiseFunction(resolve, reject) {
+		// 	const services = this.getStack();
+
+		// 	// if (services.length === 0) {
+		// 	// 	return resolve();
+		// 	// }
+
+		// 	// const promises = [];
+
+		// 	Promise.all(serives.map(service => {
+		// 		store.dispatch(service.getStartAction());
+		// 		return service.launchRequest(store.dispatch);
+		// 	}));
+		// 	.then(resolve)
+		// 	.catch(reject)
+
+		// 	// services.forEach((service, index) => {
+		// 	// 	store.dispatch(service.getStartAction());
+
+		// 	// 	service.launchRequest(store.dispatch)
+		// 	// 	.then(() => {
+		// 	// 		promises[index] = 'accepted';
+		// 	// 		let count = 0;
+		// 	// 		promises.forEach(currentPromise => {
+		// 	// 			if (currentPromise === 'accepted') {
+		// 	// 				count = count + 1;
+		// 	// 			}
+		// 	// 		});
+		// 	// 		if (count === promises.length) {
+		// 	// 			resolve();
+		// 	// 		}
+		// 	// 	})
+		// 	// 	.catch(reject);
+		// 	// 	return 'start_request';
+		// 	// });
+
+		// }.bind(this));
 	}
 }

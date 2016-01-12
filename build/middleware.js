@@ -12,18 +12,16 @@ var ServiceClass = require('./ServiceClass');
 
 var queuingServiceMiddleware = function queuingServiceMiddleware() {
 	var stack = arguments.length <= 0 || arguments[0] === undefined ? [] : arguments[0];
-	return function (store) {
+	return function () {
 		return function (next) {
 			return function (action) {
-
 				if (action instanceof ServiceClass) {
 					stack.push(action);
-					return;
+					return null;
 					// var startAction = action.getStartAction();
 					// action.launchRequest(store.dispatch);
 					// return next(startAction);
 				}
-
 				return next(action);
 			};
 		};
@@ -31,11 +29,11 @@ var queuingServiceMiddleware = function queuingServiceMiddleware() {
 };
 
 exports.queuingServiceMiddleware = queuingServiceMiddleware;
+// serialize request to map action
+// Differ success call
 var middleware = function middleware(store) {
 	return function (next) {
 		return function (action) {
-			//serialize request to map action
-			//Differ success call
 			if (action instanceof ServiceClass) {
 				var startAction = action.getStartAction();
 				action.launchRequest(store.dispatch);
@@ -87,50 +85,63 @@ var ServiceMiddlewareManager = (function () {
 
 			return function (store) {
 				return function (next) {
-					return (function (action) {
-						// if(this._silentMode) {
-						// 	return next(action);
-						// }
+					return function (action) {
 						if (_this._stackMode) {
 							return _this._queuingServiceMiddleware(store)(next)(action);
-						} else {
-							return _this._middleware(store)(next)(action);
 						}
-					}).bind(_this);
+						return _this._middleware(store)(next)(action);
+					};
 				};
-			};
+			}; // .bind(this)
 		}
 	}, {
 		key: 'executeStackServices',
 		value: function executeStackServices(store) {
-			var _this2 = this;
+			// const manager = this;
 
-			var manager = this;
-			return new Promise((function (resolve, reject) {
-				var services = _this2.getStack();
-				if (services.length === 0) {
-					return resolve();
-				}
+			var services = this.getStack();
+			return Promise.all(services.map(function (service) {
+				store.dispatch(service.getStartAction());
+				return service.launchRequest(store.dispatch);
+			}));
 
-				var promises = [];
-				services.forEach((function (service, index) {
-					store.dispatch(service.getStartAction());
+			// return new Promise(function promiseFunction(resolve, reject) {
+			// 	const services = this.getStack();
 
-					service.launchRequest(store.dispatch).then((function () {
-						promises[index] = 'accepted';
-						var count = 0;
-						promises.forEach(function (currentPromise) {
-							if (currentPromise === 'accepted') {
-								count = count + 1;
-							}
-						});
-						if (count === promises.length) {
-							resolve();
-						}
-					}).bind(manager))['catch'](reject);
-					return 'start_request';
-				}).bind(_this2));
-			}).bind(this));
+			// 	// if (services.length === 0) {
+			// 	// 	return resolve();
+			// 	// }
+
+			// 	// const promises = [];
+
+			// 	Promise.all(serives.map(service => {
+			// 		store.dispatch(service.getStartAction());
+			// 		return service.launchRequest(store.dispatch);
+			// 	}));
+			// 	.then(resolve)
+			// 	.catch(reject)
+
+			// 	// services.forEach((service, index) => {
+			// 	// 	store.dispatch(service.getStartAction());
+
+			// 	// 	service.launchRequest(store.dispatch)
+			// 	// 	.then(() => {
+			// 	// 		promises[index] = 'accepted';
+			// 	// 		let count = 0;
+			// 	// 		promises.forEach(currentPromise => {
+			// 	// 			if (currentPromise === 'accepted') {
+			// 	// 				count = count + 1;
+			// 	// 			}
+			// 	// 		});
+			// 	// 		if (count === promises.length) {
+			// 	// 			resolve();
+			// 	// 		}
+			// 	// 	})
+			// 	// 	.catch(reject);
+			// 	// 	return 'start_request';
+			// 	// });
+
+			// }.bind(this));
 		}
 	}]);
 

@@ -76,17 +76,17 @@ var ServiceClass = (function () {
 	_createClass(ServiceClass, [{
 		key: 'isFinished',
 		value: function isFinished() {
-			return this.state == SERVICE_STATE.FINISH;
+			return this.state === SERVICE_STATE.FINISH;
 		}
 	}, {
 		key: 'isExecuting',
 		value: function isExecuting() {
-			return this.state == SERVICE_STATE.EXECUTE;
+			return this.state === SERVICE_STATE.EXECUTE;
 		}
 	}, {
 		key: 'hasAnError',
 		value: function hasAnError() {
-			return this.state == SERVICE_STATE.error;
+			return this.state === SERVICE_STATE.error;
 		}
 	}, {
 		key: 'launchRequest',
@@ -120,37 +120,41 @@ var ServiceClass = (function () {
 	}, {
 		key: 'defaultAjaxOptions',
 		value: function defaultAjaxOptions(dispatch) {
+			var _this2 = this;
+
 			return {
 				'method': METHODS_MAPPER[this.action],
 				'contentType': 'application/json; charset=utf-8',
 				'dataType': 'json',
-				"crossDomain": true,
-				"headers": {
-					"accept": "application/json"
+				'crossDomain': true,
+				'headers': {
+					'accept': 'application/json'
 				},
-				'success': (function (data, status, request) {
-					this.state = SERVICE_STATE.FINISH;
-					if (this.options.parse) {
-						this.dataResponse = this.options.parse.apply(this, [data, this.options]);
+				'success': function success(data) {
+					_this2.state = SERVICE_STATE.FINISH;
+					if (_this2.options.parse) {
+						_this2.dataResponse = _this2.options.parse.apply(_this2, [data, _this2.options]);
 					} else {
-						this.dataResponse = data;
+						_this2.dataResponse = data;
 					}
-					dispatch(this.serialize());
-				}).bind(this),
-				'error': (function (error) {
-					this.state = SERVICE_STATE.ERROR;
-					this.error = error.responseJSON;
-					dispatch(this.serialize());
-				}).bind(this)
+					dispatch(_this2.serialize());
+				},
+				'error': function error(_error) {
+					_this2.state = SERVICE_STATE.ERROR;
+					_this2.error = _error.responseJSON;
+					dispatch(_this2.serialize());
+				}
 			};
 		}
 	}, {
 		key: 'generateAjaxOption',
 		value: function generateAjaxOption(dispatch) {
+			var _this3 = this;
+
 			var ajaxOptions = this.defaultAjaxOptions(dispatch);
 
 			if (this.data) {
-				if (this.action == METHODS.READ) {
+				if (this.action === METHODS.READ) {
 					ajaxOptions.data = this.data;
 				} else {
 					ajaxOptions.data = JSON.stringify(this.data);
@@ -158,19 +162,23 @@ var ServiceClass = (function () {
 			}
 
 			if (this.options.success) {
-				var defaultsSuccess = ajaxOptions.success;
-				ajaxOptions.success = (function (res) {
-					defaultsSuccess(res);
-					this.options.success.apply(this, [res]);
-				}).bind(this);
+				(function () {
+					var defaultsSuccess = ajaxOptions.success;
+					ajaxOptions.success = function (res) {
+						defaultsSuccess(res);
+						_this3.options.success.apply(_this3, [res]);
+					};
+				})();
 			}
 
 			if (this.options.error) {
-				var defaultError = ajaxOptions.error;
-				ajaxOptions['error'] = (function (res) {
-					defaultError(res);
-					this.options.error.apply(this, [res]);
-				}).bind(this);
+				(function () {
+					var defaultError = ajaxOptions.error;
+					ajaxOptions.error = function (res) {
+						defaultError(res);
+						_this3.options.error.apply(_this3, [res]);
+					};
+				})();
 			}
 
 			if (this.options.headers) {
@@ -193,7 +201,6 @@ var ServiceClass = (function () {
 		key: 'serialize',
 		value: function serialize() {
 			return {
-
 				type: this.serializeType(),
 				docName: this.docName,
 				action: this.action,
