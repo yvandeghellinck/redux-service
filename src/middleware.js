@@ -1,13 +1,13 @@
 const ServiceClass = require('./ServiceClass');
 
 export const queuingServiceMiddleware = (stack = []) => () => next => action => {
+	console.log("Queing stack?");
 	if (action instanceof ServiceClass) {
 		stack.push(action);
 		return null;
-		// var startAction = action.getStartAction();
-		// action.launchRequest(store.dispatch);
-		// return next(startAction);
 	}
+	console.log("Not servicle class action");
+	console.log(action);
 	return next(action);
 };
 
